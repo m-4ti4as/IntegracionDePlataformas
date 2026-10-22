@@ -1,1 +1,1 @@
-# IntegracionDePlataformas
+# IntegracionDePlataformas_Grupo6
