@@ -1,2 +1,2 @@
 # IntegracionDePlataformas_Grupo6
-MarianAlvarez
+
