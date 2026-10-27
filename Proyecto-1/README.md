@@ -4,7 +4,7 @@ Trabajo de la semana 3 de Integración de Plataformas. Esta carpeta contiene los
 
 ## Para ejecutarlo
 
-Se necesita Windows, Java 21 JDK, Python 3 y conexión a internet en el primer inicio. Los pasos están en `GUIA-DEMOSTRACION.md`.
+Se necesita Windows, Java 21 JDK, Python 3 y conexión a internet en el primer inicio. Los pasos están en `Guia como usar.md`.
 
 Flowable se descarga automáticamente la primera vez que se ejecuta `iniciar-flowable-rest.cmd`. Los archivos descargados quedan en `flowable-6.8.1/` y no se suben al repositorio.
 
