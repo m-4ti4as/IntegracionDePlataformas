@@ -1,0 +1,21 @@
+{
+  "key": "resultadoOportunidad",
+  "name": "Registrar resultado de la oportunidad",
+  "fields": [
+    {"id": "nombreCliente", "name": "Cliente", "type": "text", "readOnly": true},
+    {"id": "nombreMascota", "name": "Mascota", "type": "text", "readOnly": true},
+    {"id": "estadoOportunidad", "name": "Estado actual", "type": "text", "readOnly": true},
+    {
+      "fieldType": "OptionFormField",
+      "id": "resultado",
+      "name": "Resultado de la conversación",
+      "type": "dropdown",
+      "required": true,
+      "hasEmptyValue": true,
+      "options": [
+        {"id": "COMPRA", "name": "Venta concretada"},
+        {"id": "NO_CONCRETADA", "name": "No concretada"}
+      ]
+    }
+  ]
+}

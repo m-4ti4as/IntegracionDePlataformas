@@ -1,0 +1,13 @@
+{
+  "key": "aprobarMensaje",
+  "name": "Revisar y aprobar mensaje de cumpleaños",
+  "fields": [
+    {"id": "nombreCliente", "name": "Cliente", "type": "text", "readOnly": true},
+    {"id": "nombreMascota", "name": "Mascota", "type": "text", "readOnly": true},
+    {"id": "fechaEvento", "name": "Fecha de cumpleaños", "type": "text", "readOnly": true},
+    {"id": "mensajeSugerido", "name": "Mensaje sugerido", "type": "multi-line-text", "readOnly": true},
+    {"id": "destinatario", "name": "Correo destinatario", "type": "text", "required": true},
+    {"id": "mensajeFinal", "name": "Mensaje final", "type": "multi-line-text", "required": true},
+    {"id": "aprobado", "name": "Aprobar envío", "type": "boolean", "required": true}
+  ]
+}

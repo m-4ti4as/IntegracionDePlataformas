@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- server.py conecta esta página con Flowable REST en el puerto 8080. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peluditos Pet Chile · Cumpleaños</title>
+<!-- Estilos sencillos para el formulario, las tareas y los avisos. -->
+<style>
+body {
+  margin: 0;
+  background: #f2f2f2;
+  color: #222;
+  font-family: Arial, sans-serif;
+  line-height: 1.4;
+}
+header {
+  background: white;
+  border-bottom: 1px solid #ccc;
+  padding: 18px 20px;
+}
+header h1 { margin: 0 0 5px; font-size: 24px; }
+header p { margin: 0; }
+main { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+section { background: white; border: 1px solid #ccc; padding: 18px; margin-bottom: 18px; }
+h2 { margin-top: 0; font-size: 20px; }
+h3 { font-size: 17px; }
+label { display: block; margin: 12px 0 4px; }
+input, textarea, select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  font: inherit;
+}
+textarea { min-height: 100px; }
+button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid #555;
+  border-radius: 3px;
+  background: #eee;
+  color: #222;
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { background: #ddd; }
+button.danger { border-color: #a33; color: #a33; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.muted { color: #555; }
+.task { border-top: 1px solid #ccc; padding: 15px 0; }
+.task:first-child { border-top: 0; }
+.task p { margin: 8px 0; }
+.tag { font-weight: bold; }
+.tag.pending { color: #806000; }
+.tag.red { color: #a33; }
+.facts { margin: 8px 0; }
+.fact { display: inline-block; margin-right: 12px; }
+.notice { margin-top: 12px; padding: 10px; border: 1px solid #8a8; background: #f1faf1; }
+.notice.error { border-color: #b77; background: #fff2f2; }
+.history article { border-top: 1px solid #ccc; padding: 10px 0; }
+.history article:first-child { border-top: 0; }
+</style>
+</head>
+<body>
+<!-- Encabezado de la demostración del proceso de cumpleaños. -->
+<header>
+  <h1>Peluditos Pet Chile</h1>
+  <p>Prueba del proceso de cumpleaños de mascotas</p>
+</header>
+<main>
+  <section>
+    <!-- Estos datos inician una instancia BPMN mediante server.py. -->
+    <h2>Iniciar una oportunidad</h2>
+    <p>Ingresa los datos para probar el proceso. El correo se simula; no se envía un mensaje real.</p>
+    <form id="start-form">
+      <label for="nombreCliente">Nombre del cliente</label>
+      <input id="nombreCliente" required value="Camila">
+      <label for="correoCliente">Correo</label>
+      <input id="correoCliente" type="email" required value="camila@example.com">
+      <label for="nombreMascota">Nombre de la mascota</label>
+      <input id="nombreMascota" required value="Luna">
+      <label for="tipoMascota">Tipo de mascota</label>
+      <input id="tipoMascota" required value="perrita">
+      <label for="fechaEvento">Cumpleaños de la mascota (DD/MM/AAAA)</label>
+      <input id="fechaEvento" type="text" inputmode="numeric" placeholder="DD/MM/AAAA" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required>
+      <div class="actions"><button type="submit">Iniciar proceso</button></div>
+    </form>
+    <div id="start-notice"></div>
+  </section>
+  <section>
+    <!-- Flowable espera aquí la revisión del mensaje y el resultado de la venta. -->
+    <h2>Tareas pendientes</h2>
+    <p>Aquí se revisa el mensaje sugerido y luego se registra si hubo venta.</p>
+    <button id="refresh" type="button">Actualizar tareas</button>
+    <div id="tasks"><p>Cargando tareas...</p></div>
+  </section>
+  <section>
+    <!-- Historial de las instancias iniciadas en este navegador. -->
+    <h2>Procesos iniciados desde esta página</h2>
+    <div id="history" class="history"></div>
+  </section>
+</main>
+<script>
+// Escapa datos para que no se interpreten como etiquetas HTML.
+const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+// Los identificadores se guardan en este navegador para mostrar el historial.
+const instances = () => JSON.parse(localStorage.getItem("peluditos-flowable-instances") || "[]");
+const remember = id => localStorage.setItem("peluditos-flowable-instances", JSON.stringify([id,...instances()].slice(0,10)));
+// Envía peticiones a server.py y presenta los errores HTTP.
+async function api(path, options={}) {
+  const response = await fetch(path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Error de comunicación");
+  return body;
+}
+// Muestra un aviso junto al formulario correspondiente.
+function notice(target,message,error=false){target.innerHTML='<div class="notice'+(error?' error':'')+'">'+esc(message)+'</div>'}
+// Muestra fechas en orden chileno; Flowable conserva el formato AAAA-MM-DD.
+function fechaVisible(iso){
+  const match=String(iso||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return match?match[3]+"/"+match[2]+"/"+match[1]:String(iso||"");
+}
+// Valida la fecha escrita y la convierte al formato usado por el proceso.
+function fechaProceso(visible){
+  const match=String(visible).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!match) return null;
+  const day=Number(match[1]),month=Number(match[2]),year=Number(match[3]);
+  const date=new Date(year,month-1,day);
+  if(date.getFullYear()!==year||date.getMonth()!==month-1||date.getDate()!==day) return null;
+  return match[3]+"-"+match[2]+"-"+match[1];
+}
+// Propone una fecha 15 días después de hoy para la prueba.
+const today = new Date(); today.setDate(today.getDate()+15);
+document.getElementById("fechaEvento").value = [String(today.getDate()).padStart(2,"0"),String(today.getMonth()+1).padStart(2,"0"),today.getFullYear()].join("/");
+// Crea una instancia BPMN con los datos escritos en el formulario.
+document.getElementById("start-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const data={};
+  for(const key of ["nombreCliente","correoCliente","nombreMascota","tipoMascota","fechaEvento"]) data[key]=document.getElementById(key).value.trim();
+  const target=document.getElementById("start-notice");
+  data.fechaEvento=fechaProceso(data.fechaEvento);
+  if(!data.fechaEvento){notice(target,"Escribe una fecha válida en formato DD/MM/AAAA.",true);return}
+  try {
+    const result=await api("/api/start",{method:"POST",body:JSON.stringify(data)});
+    remember(result.id); notice(target,"Instancia creada: "+result.id+". El worker preparará la sugerencia.");
+    await loadAll();
+  } catch(error) {notice(target,error.message,true)}
+});
+// Construye la tarjeta de la tarea de revisión o seguimiento.
+function taskHtml(task) {
+  const v=task.variables, who=esc(v.nombreCliente), pet=esc(v.nombreMascota), date=esc(fechaVisible(v.fechaEvento));
+  const facts='<div class="facts"><span class="fact">'+who+'</span><span class="fact">'+pet+'</span><span class="fact">Cumpleaños: '+date+'</span></div>';
+  if(task.step==="approve") return '<article class="task"><span class="tag">REVISIÓN</span><h3>Mensaje para '+pet+'</h3>'+facts+
+    '<form data-task="'+esc(task.id)+'" data-step="approve"><label>Destinatario</label><input name="destinatario" type="email" required value="'+esc(v.correoCliente)+'">'+
+    '<label>Mensaje sugerido (editable)</label><textarea name="mensajeFinal" required>'+esc(v.mensajeSugerido)+'</textarea>'+
+    '<div class="actions"><button type="submit">Aprobar y registrar envío</button><button class="danger" type="button" data-postpone="'+esc(task.id)+'">Posponer</button></div></form></article>';
+  if(task.step==="follow") return '<article class="task"><span class="tag pending">PENDIENTE</span><h3>Seguimiento de '+pet+'</h3>'+facts+
+    '<p class="muted">La dueña conversa con '+who+' y decide el resultado. El cliente conserva su condición de cliente.</p>'+
+    '<form data-task="'+esc(task.id)+'" data-step="follow"><label>Resultado de esta oportunidad</label><select name="resultado"><option value="">Selecciona…</option><option value="COMPRA">Venta concretada</option><option value="NO_CONCRETADA">No concretada</option></select>'+
+    '<div class="actions"><button type="submit">Registrar resultado</button></div></form></article>';
+  return '<article class="task">'+esc(task.name)+'</article>';
+}
+// Consulta las tareas pendientes y conecta los botones con sus acciones.
+async function loadTasks(){
+  const target=document.getElementById("tasks");
+  try {
+    const result=await api("/api/tasks");
+    target.innerHTML=result.tasks.length?result.tasks.map(taskHtml).join(""):'<p class="muted">No hay tareas pendientes. Inicia una oportunidad o espera al worker unos segundos.</p>';
+    target.querySelectorAll("form").forEach(form=>form.addEventListener("submit",completeTask));
+    target.querySelectorAll("[data-postpone]").forEach(button=>button.addEventListener("click",async()=>{
+      if(!confirm("¿Posponer esta oportunidad?")) return;
+      try{await api("/api/tasks/"+button.dataset.postpone,{method:"POST",body:JSON.stringify({step:"approve",aprobado:false})});await loadAll()}
+      catch(error){alert(error.message)}
+    }));
+  } catch(error){notice(target,error.message,true)}
+}
+// Envía la decisión de la dueña y completa la tarea en Flowable.
+async function completeTask(event){
+  event.preventDefault();
+  const form=event.currentTarget;
+  const data={step:form.dataset.step};
+  if(data.step==="approve"){data.aprobado=true;data.destinatario=form.elements.destinatario.value;data.mensajeFinal=form.elements.mensajeFinal.value}
+  else data.resultado=form.elements.resultado.value;
+  try{await api("/api/tasks/"+form.dataset.task,{method:"POST",body:JSON.stringify(data)});await loadAll()}
+  catch(error){alert(error.message)}
+}
+// Consulta el estado de las instancias recordadas en el navegador.
+async function loadHistory(){
+  const target=document.getElementById("history"), ids=instances();
+  if(!ids.length){target.innerHTML='<p class="muted">Aún no se inicia ninguna instancia desde esta pantalla.</p>';return}
+  const cards=await Promise.all(ids.map(async id=>{
+    try{
+      const info=await api("/api/history/"+id),v=info.variables;
+      const done=!!info.instance.endTime;
+      const status=v.estadoOportunidad||(done?'POSPUESTA':'EN PROCESO');
+      const className=status==="PENDIENTE"?" pending":status==="NO_CONCRETADA"?" red":"";
+      return '<article><span class="tag'+className+'">'+esc(status)+'</span> <strong>'+esc(v.nombreMascota||"Mascota")+'</strong> · '+esc(v.nombreCliente||"Cliente")+
+        '<br><small>'+esc(id)+' · '+(done?'Finalizada':'Activa')+'</small></article>';
+    }catch(error){return '<article>'+esc(id)+' · '+esc(error.message)+'</article>'}
+  }));
+  target.innerHTML=cards.join("");
+}
+// Actualiza tareas e historial después de cada acción.
+async function loadAll(){await Promise.all([loadTasks(),loadHistory()])}
+document.getElementById("refresh").addEventListener("click",loadAll);
+// Revisa cambios cada diez segundos sin saturar la consola si el motor está detenido.
+loadAll();setInterval(loadAll,10000);
+</script>
+</body>
+</html>

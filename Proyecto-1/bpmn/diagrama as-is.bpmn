@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="atencionRedesAsIs_defs" targetNamespace="https://peluditos.cl/bpmn">
+  <bpmn:process id="atencionRedesAsIs" name="AS-IS - Atención por redes sociales" isExecutable="false">
+    <bpmn:documentation>Proceso actual descrito por el equipo: la emprendedora responde por chat. Si no se concreta la compra, el interesado no queda registrado. Si compra, coordina pago y despacho por chat, sin registrar fechas futuras de la mascota.</bpmn:documentation>
+    <bpmn:startEvent id="inicio" name="Consulta recibida por RRSS">
+      <bpmn:outgoing>a1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="responder" name="Responder consulta de redes por chat">
+      <bpmn:incoming>a1</bpmn:incoming>
+      <bpmn:outgoing>a2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="decision" name="¿Cliente responde y compra?">
+      <bpmn:incoming>a2</bpmn:incoming>
+      <bpmn:outgoing>a3</bpmn:outgoing>
+      <bpmn:outgoing>a4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="perdido" name="Lead perdido sin registro">
+      <bpmn:incoming>a3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="coordinar" name="Coordinar pago y despacho por chat">
+      <bpmn:incoming>a4</bpmn:incoming>
+      <bpmn:outgoing>a5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="venta" name="Venta cerrada sin agendar fechas futuras">
+      <bpmn:incoming>a5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="a1" sourceRef="inicio" targetRef="responder" />
+    <bpmn:sequenceFlow id="a2" sourceRef="responder" targetRef="decision" />
+    <bpmn:sequenceFlow id="a3" sourceRef="decision" targetRef="perdido" name="No" />
+    <bpmn:sequenceFlow id="a4" sourceRef="decision" targetRef="coordinar" name="Sí" />
+    <bpmn:sequenceFlow id="a5" sourceRef="coordinar" targetRef="venta" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="atencionRedesAsIs_diagram">
+    <bpmndi:BPMNPlane id="atencionRedesAsIs_plane" bpmnElement="atencionRedesAsIs">
+      <bpmndi:BPMNShape id="inicio_di" bpmnElement="inicio"><dc:Bounds x="75" y="230" width="56" height="56" /><bpmndi:BPMNLabel><dc:Bounds x="20" y="293" width="166" height="34" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="responder_di" bpmnElement="responder"><dc:Bounds x="220" y="215" width="230" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decision_di" bpmnElement="decision"><dc:Bounds x="530" y="226" width="64" height="64" /><bpmndi:BPMNLabel><dc:Bounds x="480" y="298" width="165" height="34" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="perdido_di" bpmnElement="perdido"><dc:Bounds x="785" y="95" width="56" height="56" /><bpmndi:BPMNLabel><dc:Bounds x="718" y="155" width="190" height="34" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="coordinar_di" bpmnElement="coordinar"><dc:Bounds x="785" y="215" width="230" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="venta_di" bpmnElement="venta"><dc:Bounds x="1120" y="230" width="56" height="56" /><bpmndi:BPMNLabel><dc:Bounds x="1033" y="297" width="230" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="a1_di" bpmnElement="a1"><di:waypoint x="131" y="258" /><di:waypoint x="220" y="258" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="a2_di" bpmnElement="a2"><di:waypoint x="450" y="258" /><di:waypoint x="530" y="258" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="a3_di" bpmnElement="a3">
+        <di:waypoint x="562" y="226" /><di:waypoint x="562" y="123" /><di:waypoint x="785" y="123" />
+        <bpmndi:BPMNLabel><dc:Bounds x="685" y="96" width="34" height="22" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="a4_di" bpmnElement="a4">
+        <di:waypoint x="594" y="258" /><di:waypoint x="785" y="258" />
+        <bpmndi:BPMNLabel><dc:Bounds x="665" y="232" width="30" height="22" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="a5_di" bpmnElement="a5">
+        <di:waypoint x="1015" y="258" /><di:waypoint x="1120" y="258" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
