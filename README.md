@@ -1,7 +1,7 @@
 
 # Peluditos Pet Chile · Entrega 2
 
-La solución ayuda a Peluditos Pet Chile a registrar clientes y mascotas, dar seguimiento a ventas y preparar campañas para cumpleaños y fechas especiales.
+La solución ayuda a Peluditos Pet Chile a registrar clientes y mascotas, dar seguimiento a ventas y preparar campañas para cumpleaños y fechas especiales, la totalidad de lo realizado para la entrega 2 está en Peluditos-Entrega-2
 
 ## Qué se hizo
 
