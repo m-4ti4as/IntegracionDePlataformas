@@ -35,7 +35,6 @@ El paso 08 prepara `config.local`. El ejemplo usa PostgreSQL en 5432, Flowable e
 - [google-forms](google-forms/) contiene el script que crea el formulario y entrega las respuestas de forma autenticada.
 - [Actas](Actas/) y [Videos](Videos/) reúnen los registros, los guiones y los enlaces del equipo.
 
-Para grabar, elijan el [guion individual para el docente](Videos/guion-docente.md) o las [intervenciones para la emprendedora](Videos/guion-emprendedora.md). En ambos casos, Marian prueba el formulario, Macarena explica la conexión, Matías muestra las bases de datos y Sebastián comprueba la instalación en Windows 11.
 
 Para ejecutar la prueba integrada con la configuración del proyecto, usa PowerShell con los cuatro servicios activos.
 
