@@ -1,0 +1,17 @@
+.runtime/
+data/
+__pycache__/
+*.py[cod]
+*.class
+*.jar
+*.war
+*.bar
+*.zip
+*.log
+servicio-java/target/
+servicio-java/dependency-reduced-pom.xml
+evidencias/worker.jsonl
+config.local
+config.local.*
+*.sqlite3
+*.sqlite3-*

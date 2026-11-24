@@ -1,0 +1,24 @@
+# Valores locales. Copia este archivo a config.local para cambiar el entorno.
+FLOWABLE_HOST=127.0.0.1
+FLOWABLE_PORT=8080
+FLOWABLE_BASE=http://127.0.0.1:8080/flowable-rest
+# Los valores de ejemplo de Flowable se aplican si estas dos líneas están comentadas.
+# FLOWABLE_USER=
+# FLOWABLE_PASSWORD=
+# 08-configurar-postgresql.cmd escribe estos tres valores en config.local.
+FLOWABLE_DB_URL=jdbc:postgresql://127.0.0.1:5432/peluditos_flowable
+FLOWABLE_DB_USER=flowable_peluditos
+FLOWABLE_DB_PASSWORD=
+
+PELUDITOS_API_HOST=127.0.0.1
+PELUDITOS_API_PORT=8091
+PELUDITOS_API=http://127.0.0.1:8091
+PELUDITOS_UI_HOST=127.0.0.1
+PELUDITOS_UI_PORT=8092
+PELUDITOS_PANEL=http://127.0.0.1:8092
+PELUDITOS_DB=data/negocio.sqlite3
+
+# Enlace público de Peluditos. La importación necesita los dos valores privados.
+GOOGLE_FORMS_PUBLIC_URL=https://docs.google.com/forms/d/e/1FAIpQLSfQXc1wRTgWDC87UfuDrFk_r70bbCT563iSCGbNKLHf--LBfg/viewform
+GOOGLE_FORMS_EXEC_URL=
+GOOGLE_FORMS_SYNC_KEY=

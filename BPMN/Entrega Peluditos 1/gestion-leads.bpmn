@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:flowable="http://flowable.org/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="gestionLeads_defs" targetNamespace="https://peluditos.cl/bpmn">
+  <bpmn:message id="formularioLead" name="formularioLead" />
+  <bpmn:process id="gestionLeads" name="Gestión de leads" isExecutable="true">
+    <bpmn:documentation>El saludo inicia el flujo. La respuesta al formulario debe correlacionarse. formKey y topic son puntos de integración pendientes.</bpmn:documentation>
+    <bpmn:startEvent id="start" name="Consulta recibida por redes">
+      <bpmn:outgoing>l1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="welcome" name="Enviar bienvenida y enlace" flowable:type="external-worker" flowable:topic="enviarBienvenida">
+      <bpmn:incoming>l1</bpmn:incoming>
+      <bpmn:outgoing>l2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="form" name="Formulario recibido">
+      <bpmn:messageEventDefinition messageRef="formularioLead" />
+      <bpmn:incoming>l2</bpmn:incoming>
+      <bpmn:outgoing>l3</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="save" name="Guardar lead pendiente" flowable:type="external-worker" flowable:topic="guardarLead">
+      <bpmn:incoming>l3</bpmn:incoming>
+      <bpmn:outgoing>l4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="coupon" name="Enviar cupón 10 %" flowable:type="external-worker" flowable:topic="enviarCupon">
+      <bpmn:incoming>l4</bpmn:incoming>
+      <bpmn:outgoing>l5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="follow" name="Conversar y registrar resultado" flowable:candidateGroups="duena" flowable:formKey="seguimientoLead">
+      <bpmn:incoming>l5</bpmn:incoming>
+      <bpmn:outgoing>l6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="choice" name="¿Se concretó la compra?">
+      <bpmn:incoming>l6</bpmn:incoming>
+      <bpmn:outgoing>l7</bpmn:outgoing>
+      <bpmn:outgoing>l9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="sale" name="Marcar cliente" flowable:type="external-worker" flowable:topic="registrarCompra">
+      <bpmn:incoming>l7</bpmn:incoming>
+      <bpmn:outgoing>l8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="endSale" name="Cliente registrado">
+      <bpmn:incoming>l8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="lost" name="Marcar no concretado" flowable:type="external-worker" flowable:topic="cerrarLead">
+      <bpmn:incoming>l9</bpmn:incoming>
+      <bpmn:outgoing>l10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="endLost" name="Lead no concretado">
+      <bpmn:incoming>l10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="l1" sourceRef="start" targetRef="welcome" />
+    <bpmn:sequenceFlow id="l2" sourceRef="welcome" targetRef="form" />
+    <bpmn:sequenceFlow id="l3" sourceRef="form" targetRef="save" />
+    <bpmn:sequenceFlow id="l4" sourceRef="save" targetRef="coupon" />
+    <bpmn:sequenceFlow id="l5" sourceRef="coupon" targetRef="follow" />
+    <bpmn:sequenceFlow id="l6" sourceRef="follow" targetRef="choice" />
+    <bpmn:sequenceFlow id="l7" sourceRef="choice" targetRef="sale" name="Compra">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resultado == "COMPRA"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="l8" sourceRef="sale" targetRef="endSale" />
+    <bpmn:sequenceFlow id="l9" sourceRef="choice" targetRef="lost" name="Sin compra">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resultado == "NO_CONCRETADO"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="l10" sourceRef="lost" targetRef="endLost" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="gestionLeads_diagram">
+    <bpmndi:BPMNPlane id="gestionLeads_plane" bpmnElement="gestionLeads">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="40" y="180" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="10" y="246" width="116" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="welcome_di" bpmnElement="welcome">
+        <dc:Bounds x="135" y="165" width="150" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="form_di" bpmnElement="form">
+        <dc:Bounds x="325" y="180" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="290" y="246" width="126" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="save_di" bpmnElement="save">
+        <dc:Bounds x="420" y="165" width="170" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="coupon_di" bpmnElement="coupon">
+        <dc:Bounds x="630" y="165" width="150" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="follow_di" bpmnElement="follow">
+        <dc:Bounds x="820" y="165" width="170" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="choice_di" bpmnElement="choice">
+        <dc:Bounds x="1030" y="176" width="64" height="64" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sale_di" bpmnElement="sale">
+        <dc:Bounds x="1190" y="65" width="170" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="endSale_di" bpmnElement="endSale">
+        <dc:Bounds x="1400" y="80" width="56" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="lost_di" bpmnElement="lost">
+        <dc:Bounds x="1190" y="165" width="170" height="86" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="endLost_di" bpmnElement="endLost">
+        <dc:Bounds x="1400" y="180" width="56" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="l1_di" bpmnElement="l1">
+        <di:waypoint x="96" y="208" />
+        <di:waypoint x="135" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l2_di" bpmnElement="l2">
+        <di:waypoint x="285" y="208" />
+        <di:waypoint x="325" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l3_di" bpmnElement="l3">
+        <di:waypoint x="381" y="208" />
+        <di:waypoint x="420" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l4_di" bpmnElement="l4">
+        <di:waypoint x="590" y="208" />
+        <di:waypoint x="630" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l5_di" bpmnElement="l5">
+        <di:waypoint x="780" y="208" />
+        <di:waypoint x="820" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l6_di" bpmnElement="l6">
+        <di:waypoint x="990" y="208" />
+        <di:waypoint x="1030" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l7_di" bpmnElement="l7">
+        <di:waypoint x="1062" y="176" />
+        <di:waypoint x="1062" y="108" />
+        <di:waypoint x="1190" y="108" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1100" y="78" width="65" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l8_di" bpmnElement="l8">
+        <di:waypoint x="1360" y="108" />
+        <di:waypoint x="1400" y="108" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l9_di" bpmnElement="l9">
+        <di:waypoint x="1094" y="208" />
+        <di:waypoint x="1190" y="208" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1100" y="179" width="85" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="l10_di" bpmnElement="l10">
+        <di:waypoint x="1360" y="208" />
+        <di:waypoint x="1400" y="208" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

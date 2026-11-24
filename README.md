@@ -1,75 +1,44 @@
+# Peluditos Pet Chile · Entrega 3
 
-# Peluditos Pet Chile · Entrega 2
+El panel de la dueña registra interesados, mantiene su historial de compras y muestra las tareas de Flowable. El registro público se realiza en Google Forms. En el panel se puede registrar manualmente a quien necesite ayuda.
 
-La solución ayuda a Peluditos Pet Chile a registrar clientes y mascotas, dar seguimiento a ventas y preparar campañas para cumpleaños y fechas especiales, 
-
-## la totalidad de lo realizado para la entrega 2 está en Peluditos-Entrega-2
-
-## Qué se hizo
-
-- **Gestión de Leads.** El formulario crea un contacto y su mascota. Flowable coordina el registro y la generación de un cupón. La dueña recibe una tarea en la bandeja y registra si hubo compra.
-- **Oportunidades por fechas.** La dueña inicia una campaña desde el panel. El worker solicita un mensaje al servicio Java, la dueña lo revisa y puede aprobar o posponer el envío. El correo se simula y el resultado comercial queda en la ficha.
-- **Integración.** Flowable OSS 7.2.0 ejecuta los BPMN y conserva sus instancias, tareas e historial en H2. El panel propio de HTML, CSS y JavaScript se comunica con una API Python. El external worker Python atiende las tareas automáticas y llama a los servicios Jakarta REST.
-- **Persistencia.** SQLite reemplazó al archivo JSON como almacenamiento de negocio. El panel aplica el esquema SQL al arrancar y guarda fichas, ventas y eventos. Puede importar los datos del JSON anterior en el primer arranque.
-
-## Observaciones del profesor
-
-| Observación | Corrección y estado |
-| --- | --- |
-| Videos de presentación | Pendiente de publicar los dos videos y agregar sus enlaces en [Videos](Videos/README.md). |
-| Identificación en GitHub | Cada integrante debe revisar que su perfil muestre su nombre y apellido y que sus aportes se atribuyan a esa cuenta. |
-| Estructura del monorepo | Esta copia organiza los componentes en `panel-peluditos/`, `worker-python/` y `servicio-java/`, listos para incorporarlos al repositorio del equipo. |
-| Piscinas y carriles en el AS-IS | El modelo tiene las piscinas **Persona interesada** y **Peluditos Pet Chile**, y el carril **Dueña de Peluditos**. [BPMN AS-IS](BPMN/AS-IS.bpmn) |
-| Nombres de tareas y eventos finales | Las tareas nombran acciones como **Registrar venta** y **Actualizar estado del lead a cliente**. Los eventos finales describen el resultado del proceso. [Gestión de Leads](BPMN/gestion-leads.bpmn) · [Oportunidades por fechas](BPMN/oportunidades-fechas.bpmn) |
-| Regla de los 15 días | La tarea se llama **Generar mensaje de recordatorio** y la anticipación está en una anotación. El calendario muestra las fechas próximas y la dueña inicia la campaña desde el panel. |
-| External worker | El worker se suscribe a los ocho temas de los BPMN con `ExternalWorkerClient`, ejecuta el trabajo y devuelve los resultados a Flowable. [Worker Python](worker-python/worker.py) |
-| Servicios web Java | Los recursos usan Jakarta REST con Jersey. Maven administra las dependencias y compila el servicio. [Proyecto Maven](servicio-java/pom.xml) · [Recurso REST](servicio-java/src/main/java/cl/peluditos/PeluditosResource.java) |
-
-## Estructura
-
-| Carpeta | Contenido |
-| --- | --- |
-| [BPMN](BPMN/) | Proceso [AS-IS](BPMN/AS-IS.bpmn) y dos TO-BE ejecutables en Flowable OSS 7.2.0. |
-| [panel-peluditos](panel-peluditos/) | Interfaz HTML, CSS y JavaScript, API Python y esquema SQLite. |
-| [worker-python](worker-python/) | External worker que ejecuta tareas automáticas y comunica el resultado a Flowable. |
-| [servicio-java](servicio-java/) | API Jakarta REST con Jersey y Grizzly, compilada con Maven. |
-| [Arquitectura](Arquitectura/README.md) | Diagrama editable con los componentes implementados y planificados. |
-| [docs](docs/) | Contratos de los servicios y decisiones de persistencia. |
-| [pruebas](pruebas/) y [evidencias](evidencias/) | Prueba integrada y resultados de persistencia. |
-| [Actas](Actas/) y [Videos](Videos/) | Actas semanales y enlaces a las grabaciones. |
+En la bandeja, la API reúne las fichas guardadas en SQLite y las tareas que entrega Flowable. Por ejemplo, cuando hay que generar un cupón, el worker pide la tarea a Flowable, recibe sus datos, obtiene el código de Java y comunica el resultado. Flowable guarda el avance del proceso en PostgreSQL. [Diagrama y función de cada componente](Arquitectura/README.md)
 
 ## Instalación en Windows
 
-Descarga o clona el repositorio y entra a la carpeta que contiene los CMD. Con conexión a internet, ejecuta cada instalador y espera a que termine antes de pasar al siguiente.
+**Para la dueña.** Usa el ZIP privado que te entrega el equipo. Haz clic derecho y elige **Extraer todo**. Después de la instalación y con los servicios iniciados, abre el [panel de Peluditos](http://127.0.0.1:8092/) y entra a **Formulario**. Puedes copiar el enlace para tus interesados. El panel trae las respuestas al abrirse y cada 30 segundos mientras está abierto. La conexión ya viene preparada.
 
-1. `01-instalar-flowable.cmd`
-2. `02-instalar-python.cmd`
-3. `03-instalar-java.cmd`
-4. `04-instalar-maven.cmd`
-5. `05-instalar-bibliotecas-python.cmd`
-6. `06-instalar-bibliotecas-java.cmd`
-7. `07-compilar-servicio-java.cmd`
+Ejecuta los CMD del 01 al 08, en ese orden, y espera a que termine cada uno. Preparan Flowable OSS 7.2.0, Python 3.12 o superior, Java 21, Maven 3.9.11 y las dependencias del worker Python y de Jakarta REST con Jersey. El paso 07 compila Java. El paso 08 instala PostgreSQL 17.12 en la carpeta del proyecto, crea la base de Flowable y prepara el controlador JDBC.
 
-## Inicio
+1. El formulario ya está publicado. La copia privada está lista para el paso siguiente. Si instalaste desde GitHub, el equipo puede copiar el archivo privado `config.local.forms` junto a `iniciar-panel.cmd` y reiniciar el panel. [Configuración del formulario](google-forms/README.md)
+2. Abre `iniciar-flowable-rest.cmd`. Arranca el PostgreSQL local del proyecto cuando corresponde y luego inicia Flowable.
+3. Ejecuta `desplegar-demo-flowable.cmd`. Repite este paso si cambia algún BPMN ejecutable.
+4. Abre `iniciar-servicio-java.cmd`, `iniciar-panel.cmd` e `iniciar-worker.cmd`, en ese orden. Mantén abiertas las cuatro ventanas de los servicios.
+5. Abre el [panel local](http://127.0.0.1:8092/). Al abrirlo, el panel consulta las respuestas nuevas de Google Forms si la conexión está configurada.
 
-1. Abre `iniciar-flowable-rest.cmd` y espera a que Flowable inicie en el puerto **8080**.
-2. Abre `desplegar-demo-flowable.cmd`. El script empaqueta los dos TO-BE desde `BPMN/` y los despliega. Repite este paso si cambias los modelos.
-3. Abre `iniciar-servicio-java.cmd` para iniciar Jakarta REST en el puerto **8091**.
-4. Abre `iniciar-panel.cmd` para iniciar el panel en el puerto **8092**.
-5. Abre `iniciar-worker.cmd` y entra al [panel local](http://127.0.0.1:8092/).
-
-Mantén abiertas las cuatro ventanas de los servicios mientras usas el panel.
+El paso 08 prepara `config.local`. El ejemplo usa PostgreSQL en 5432, Flowable en 8080, Java en 8091 y el panel en 8092. La [guía de despliegue](docs/despliegue.md) indica qué ajustar para otro entorno y cómo detener la base local.
 
 ## Demostración
 
-- **Gestión de leads.** En **Formulario**, registra a un cliente y su mascota. El worker registra el lead y genera el cupón. En **Hoy → Bandeja de tareas**, marca si hubo compra y consulta el resultado en **Clientes**.
-- **Oportunidades.** En **Campañas**, inicia un recordatorio de cumpleaños o evento. Revisa y aprueba el mensaje en la bandeja. Registra el resultado de la conversación.
-- **Persistencia.** Reinicia el panel y busca la misma ficha y su venta. SQLite guarda los datos del negocio en `data/negocio.sqlite3`. Flowable guarda el estado de los procesos en H2 bajo `.runtime/data/`.
+1. Registra una respuesta en Google Forms y abre el panel. Con el worker activo, aparecerá un interesado con su mascota y una tarea de seguimiento. También puedes usar **Registrar interesado**.
+2. En **Hoy**, marca **Compró** e indica producto y monto. En **Contactos** se registra la primera venta y la ficha pasa a **Cliente**.
+3. Para el cumpleaños de esa mascota, pulsa **Preparar correo** y luego **Iniciar tareas de envío**. La dueña revisa el mensaje en **Hoy**, aprueba el envío simulado y puede marcar **No compró** en el seguimiento. La oportunidad queda cerrada sin compra. La persona conserva su estado de **Cliente** y su venta anterior.
+4. Reinicia el panel y consulta otra vez la ficha, la venta y la oportunidad. En SQLite están en `clientes`, `ventas` y `oportunidades`. PostgreSQL guarda las instancias, tareas e historial de Flowable. Puedes dejar una tarea pendiente, reiniciar el motor y retomarla en la bandeja.
 
-El envío de correo es simulado. La dueña inicia las campañas desde el panel y el calendario muestra las próximas fechas. El envío real, la integración con redes sociales y el inicio automático quedan para otra etapa.
+## Componentes
 
-Con los cuatro servicios activos, ejecuta `.runtime\venv\Scripts\python.exe pruebas\smoke.py` para probar los endpoints Java, ambos resultados de Gestión de Leads y una oportunidad de cumpleaños completa.
+- [BPMN](BPMN/) contiene los modelos editables y sus PNG.
+- [Arquitectura](Arquitectura/README.md) contiene el diagrama y su fuente editable.
+- [panel-peluditos](panel-peluditos/) contiene la interfaz, la API y el esquema SQLite.
+- [worker-python](worker-python/) consume las tareas externas de Flowable y llama a los servicios.
+- [servicio-java](servicio-java/) contiene los servicios Jakarta REST.
+- [google-forms](google-forms/) contiene el script que crea el formulario y entrega las respuestas de forma autenticada.
+- [Actas](Actas/) y [Videos](Videos/) reúnen los registros, los guiones y los enlaces del equipo.
 
-El worker registra la sugerencia y el evento `correo-simulado` en `evidencias/worker.jsonl` al ejecutar la demostración. La evidencia detalla los resultados verificados y la comprobación pendiente de escritura en H2 tras reiniciar.
+Para grabar, elijan el [guion individual para el docente](Videos/guion-docente.md) o las [intervenciones para la emprendedora](Videos/guion-emprendedora.md). En ambos casos, Marian prueba el formulario, Macarena explica la conexión, Matías muestra las bases de datos y Sebastián comprueba la instalación en Windows 11.
 
-[Contratos de los servicios](docs/servicios.md) · [Guía de persistencia](docs/persistencia.md) · [Evidencia de pruebas](evidencias/prueba-persistencia.md)
+Para ejecutar la prueba integrada con la configuración del proyecto, usa PowerShell con los cuatro servicios activos.
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\herramientas\iniciar-python.ps1 "pruebas\smoke.py"
+
+[Diseño de persistencia](docs/persistencia.md) · [Pruebas de Entrega 3](evidencias/pruebas-entrega-3.md) · [Servicios](docs/servicios.md)

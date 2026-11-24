@@ -1,0 +1,17 @@
+{
+  "versionFlowable": "6.8.1",
+  "instancia": "a469c1bb-d102-11f1-b07d-0a002700000d",
+  "inicio": "2026-10-26T03:01:10.373-03:00",
+  "fin": "2026-10-26T03:01:33.76-03:00",
+  "mascota": "Bimba",
+  "evento": "CUMPLEANOS",
+  "mensajeSugerido": "Hola Valentina, se acerca el cumpleaños de Bimba. En Peluditos Pet Chile podemos preparar una torta especial para tu perrita. Si te interesa, responde este mensaje y coordinamos los detalles.",
+  "correoSimulado": true,
+  "estadoFinal": "NO_CONCRETADA",
+  "formularios": {
+    "aprobacionRegistrada": true,
+    "resultadoRegistrado": true
+  },
+  "servicioJava": "POST /api/sugerencia",
+  "worker": "generarSugerencia, enviarCorreo, cerrarOportunidad"
+}
